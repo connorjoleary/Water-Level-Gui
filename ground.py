@@ -20,16 +20,20 @@ canvas = FigureCanvasTkAgg(f, master=main)
 canvas.show()
 canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
-def update(a, canvas):
-        data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
-        a.clear()
-        a.plot(data['x'], data['y'], color='r', label='the data')
+data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
+a.clear()
+a.plot(data['x'], data['y'], color='r', label='the data')
+canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-        
-        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+def update(f):
+    f.clear()
+    a = f.add_subplot(111)
+    data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
+    a.plot(data['x'], data['y'], color='r', label='the data')
+    f.canvas.draw()
 
-        print ("update")
-        main.after(5000, functools.partial(update, a)(canvas))
+    print ("update")
+    main.after(3000, update, f)
 
-main.after(5000, functools.partial(update, a)(canvas))
+main.after(3000, update, f)
 main.mainloop()

@@ -10,6 +10,17 @@ LARGE_FONT= ("Verdana", 12)
 
 import numpy as np
 data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
+f = Figure(figsize=(5,5), dpi=100)
+
+def update(f):
+    f.clear()
+    a = f.add_subplot(111)
+    data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
+    a.plot(data['x'], data['y'], color='r', label='the data')
+    f.canvas.draw()
+
+    print ("update")
+    app.after(3000, update, f)
 
 class water(tk.Tk):
 
@@ -62,7 +73,7 @@ class Page(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        f = Figure(figsize=(5,5), dpi=100)
+        
         a = f.add_subplot(111)
         a.plot(data['x'], data['y'], color='r', label='the data')
 
@@ -78,4 +89,6 @@ class Page(tk.Frame):
 
 
 app = water()
+
+app.after(3000, update, f)
 app.mainloop()
