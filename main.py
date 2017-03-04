@@ -20,9 +20,9 @@ def update(f):
     f.canvas.draw()
 
     print ("update")
-    app.after(3000, update, f)
+    main.after(3000, update, f)
 
-class water(tk.Tk):
+class mainP(tk.Tk):
 
     def __init__(self, *args, **kwargs):
         
@@ -35,49 +35,40 @@ class water(tk.Tk):
 
         self.frames = {}
 
-        for F in (StartPage, Page):
-
+        for F in (StartPage, GraphPage):
             frame = F(container, self)
-
             self.frames[F] = frame
-
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame(StartPage)
 
     def show_frame(self, cont):
-
         frame = self.frames[cont]
         frame.tkraise()
 
 class StartPage(tk.Frame):
-
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
         label = tk.Label(self, text="Start Page", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
 
         button = ttk.Button(self, text="Visit Page 1",
-                            command=lambda: controller.show_frame(Page))
+                            command=lambda: controller.show_frame(GraphPage))
         button.pack()
 
-class Page(tk.Frame):
+class GraphPage(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
-        
 
         button1 = ttk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        
         a = f.add_subplot(111)
         a.plot(data['x'], data['y'], color='r', label='the data')
-
-        
 
         canvas = FigureCanvasTkAgg(f, self)
         canvas.show()
@@ -88,7 +79,6 @@ class Page(tk.Frame):
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 
-app = water()
-
-app.after(3000, update, f)
-app.mainloop()
+main = mainP()
+main.after(3000, update, f)
+main.mainloop()
