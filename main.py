@@ -13,18 +13,17 @@ data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
 data2 = np.genfromtxt('data1.csv', delimiter=',', names=['date', 'level'])
 f = Figure(figsize=(5,5), dpi=100)
 
-Tanks = []
+def update(f, tanks):
+    for tank in tanks:
+        f.clear()
+        a = f.add_subplot(2,2,2)
+        data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
+        a.plot(data['x'], data['y'], color='r', label='the data')
 
-def update(f):
-    f.clear()
-    a = f.add_subplot(2,2,2)
-    data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
-    a.plot(data['x'], data['y'], color='r', label='the data')
-
-    a2 = f.add_subplot(2,2,4)
-    data2 = np.genfromtxt('data1.csv', delimiter=',', names=['date', 'level'])
-    a2.plot(data2['date'], data2['level'], color='r', label='Tank 2')
-    f.canvas.draw()
+        a2 = f.add_subplot(2,2,4)
+        data2 = np.genfromtxt('data1.csv', delimiter=',', names=['date', 'level'])
+        a2.plot(data2['date'], data2['level'], color='r', label='Tank 2')
+        f.canvas.draw()
 
     print ("update")
     main.after(3000, update, f)
@@ -79,17 +78,19 @@ class GraphPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
+        self.tanks=[]
+        self.num=0
 
         button1 = ttk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
         button2 = ttk.Button(self, text="New Tank",
-                            command=lambda: add_tank())
+                            command=lambda: self.add_tank())
         button2.pack()
 
-        #Add one tank
-        Tanks.append(add_tank)
+        #Add initial tank
+        self.tanks.append(self.add_tank())
         
 
         canvas = FigureCanvasTkAgg(f, self)
@@ -100,16 +101,28 @@ class GraphPage(tk.Frame):
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-    def add_tank():
-        tank = Frame(GraphPage, self)
-        a = f.add_subplot(111)
+    def add_tank(self):
+        self.num+=1
+        #TODO: correct filename
+        fileName = "data"+str(len(self.tanks))
+
+        container = tk.Frame(self)
+        return TankFrame(container, self, fileName)
+
+class TankFrame(tk.Frame):
+
+    def __init__(self, parent, controller, fileName):
+        tk.Frame.__init__(self, parent)
+        #label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
+        #label.pack(pady=10,padx=10)
+
+        tank = tk.Frame(self)
+        fig = Figure(figsize=(5,5), dpi=100)
+        a = fig.add_subplot(111)
         a.plot(data['x'], data['y'], color='r', label='Water Level')
         
         # a2 = f.add_subplot(111)
-        a.plot(data2['date'], data2['level'], color='r', label='')
-
-        return tank
-
+        a.plot(data2['date'], data2['level'], color='r', label='Info')
 
 main = mainP()
 main.after(3000, update, f)
