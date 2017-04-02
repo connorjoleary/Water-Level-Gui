@@ -103,10 +103,10 @@ class GraphPage(tk.Frame):
     def add_tank():
         tank = Frame(GraphPage, self)
         a = f.add_subplot(111)
-        a.plot(data['x'], data['y'], color='r', label='Tank 1')
+        a.plot(data['x'], data['y'], color='r', label='Water Level')
         
         # a2 = f.add_subplot(111)
-        a.plot(data2['date'], data2['level'], color='r', label='Tank 2')
+        a.plot(data2['date'], data2['level'], color='r', label='')
 
         return tank
 
