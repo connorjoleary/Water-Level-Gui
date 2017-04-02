@@ -10,13 +10,20 @@ LARGE_FONT= ("Verdana", 12)
 
 import numpy as np
 data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
+data2 = np.genfromtxt('data1.csv', delimiter=',', names=['date', 'level'])
 f = Figure(figsize=(5,5), dpi=100)
+
+Tanks = []
 
 def update(f):
     f.clear()
-    a = f.add_subplot(111)
+    a = f.add_subplot(2,2,2)
     data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
     a.plot(data['x'], data['y'], color='r', label='the data')
+
+    a2 = f.add_subplot(2,2,4)
+    data2 = np.genfromtxt('data1.csv', delimiter=',', names=['date', 'level'])
+    a2.plot(data2['date'], data2['level'], color='r', label='Tank 2')
     f.canvas.draw()
 
     print ("update")
@@ -35,7 +42,7 @@ class mainP(tk.Tk):
 
         self.frames = {}
 
-        for F in (StartPage, GraphPage):
+        for F in (StartPage, GraphPage, InfoPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -52,9 +59,19 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text="Start Page", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
 
-        button = ttk.Button(self, text="Visit Page 1",
+        button = ttk.Button(self, text="Graphs",
                             command=lambda: controller.show_frame(GraphPage))
         button.pack()
+        button2 = ttk.Button(self, text="Information",
+                            command=lambda: controller.show_frame(InfoPage))
+        button2.pack()
+
+class InfoPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self,parent)
+        label = tk.Label(self, text="Information Page", font=LARGE_FONT)
+        label.pack(pady=10,padx=10)
+
 
 class GraphPage(tk.Frame):
 
@@ -67,8 +84,13 @@ class GraphPage(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
 
-        a = f.add_subplot(111)
-        a.plot(data['x'], data['y'], color='r', label='the data')
+        button2 = ttk.Button(self, text="New Tank",
+                            command=lambda: add_tank())
+        button2.pack()
+
+        #Add one tank
+        Tanks.append(add_tank)
+        
 
         canvas = FigureCanvasTkAgg(f, self)
         canvas.show()
@@ -77,6 +99,16 @@ class GraphPage(tk.Frame):
         toolbar = NavigationToolbar2TkAgg(canvas, self)
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def add_tank():
+        tank = Frame(GraphPage, self)
+        a = f.add_subplot(111)
+        a.plot(data['x'], data['y'], color='r', label='Tank 1')
+        
+        # a2 = f.add_subplot(111)
+        a.plot(data2['date'], data2['level'], color='r', label='Tank 2')
+
+        return tank
 
 
 main = mainP()
