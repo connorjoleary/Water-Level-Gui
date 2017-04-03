@@ -42,7 +42,7 @@ class mainP(tk.Tk):
 
         self.frames = {}
 
-        for F in (StartPage, GraphPage, InfoPage):
+        for F in (StartPage, GraphPage, SettingsPage, InfoPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -62,15 +62,56 @@ class StartPage(tk.Frame):
         button = ttk.Button(self, text="Graphs",
                             command=lambda: controller.show_frame(GraphPage))
         button.pack()
-        button2 = ttk.Button(self, text="Information",
-                            command=lambda: controller.show_frame(InfoPage))
+        button2 = ttk.Button(self, text="Settings",
+                            command=lambda: controller.show_frame(SettingsPage))
         button2.pack()
+        button3 = ttk.Button(self, text="Information",
+                            command=lambda: controller.show_frame(InfoPage))
+        button3.pack()
 
 class InfoPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Information Page", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
+        label = tk.Label(self, text="Information", font=LARGE_FONT)
+        label.grid(row=0, column=1)
+
+
+class SettingsPage(tk.Frame):
+    def __init__(self, parent, controller):
+        self.values=["Tank 1", "Tank 2", .26, .025, 7]
+        tk.Frame.__init__(self,parent)
+        label = tk.Label(self, text="Settings", font=("Helvetica", 32))
+        label.grid(row=0, column=0, columnspan=3)
+
+        tk.Label(self, text="Tank Names", font=("Helvetica", 20)).grid(padx=10,row=2,)
+        tk.Label(self, text="First",font=("Helvetica", 16)).grid(padx=10,row=2, column=1)
+        tk.Label(self, text="Second",font=("Helvetica", 16)).grid(padx=10,row=3, column=1)
+
+        e1 = tk.Entry(self)
+        e2 = tk.Entry(self)
+        e1.grid(padx=10,row=2, column=2)
+        e2.grid(padx=10,row=3, column=2)
+
+        tk.Label(self, text="Conversion Factors", font=("Helvetica", 20)).grid(padx=10,row=4)
+        tk.Label(self, text="Water Level \n(to get inches)",font=("Helvetica", 16)).grid(padx=10,row=4, column=1)
+        tk.Label(self, text="Battery \n(to get volts)",font=("Helvetica", 16)).grid(padx=10,row=5, column=1)
+
+        e3 = tk.Entry(self)
+        e4 = tk.Entry(self)
+        e3.grid(padx=10,row=4, column=2)
+        e4.grid(padx=10,row=5, column=2)
+
+        tk.Label(self, text="Serial Port Number", font=("Helvetica", 20)).grid(padx=10,row=6)
+        e5 = tk.Entry(self)
+        e5.grid(padx=10,row=6, column=2)
+
+        button = ttk.Button(self, text="Enter",
+                            command=lambda: getValues())
+        button.grid()
+
+        def getValues():
+            print ("getting Vals")
+            self.values=[e1,e2,e3,e4,e5]
 
 
 class GraphPage(tk.Frame):
@@ -94,5 +135,5 @@ class GraphPage(tk.Frame):
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 main = mainP()
-main.after(30, update, f)
+main.after(1, update, f)
 main.mainloop()
