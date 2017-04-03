@@ -4,29 +4,30 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Listbox, Scrollbar
 
 LARGE_FONT= ("Verdana", 12)
 
 import numpy as np
 data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
 data2 = np.genfromtxt('data1.csv', delimiter=',', names=['date', 'level'])
-f = Figure(figsize=(5,5), dpi=100)
 
-def update(f, tanks):
+tanks = []
+
+def update(tanks):
     for tank in tanks:
-        f.clear()
-        a = f.add_subplot(2,2,2)
+        tank.f.clear()
+        a = tank.f.add_subplot(2,2,2)
         data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
         a.plot(data['x'], data['y'], color='r', label='the data')
 
-        a2 = f.add_subplot(2,2,4)
+        a2 = tank.f.add_subplot(2,2,4)
         data2 = np.genfromtxt('data1.csv', delimiter=',', names=['date', 'level'])
         a2.plot(data2['date'], data2['level'], color='r', label='Tank 2')
-        f.canvas.draw()
+        tank.f.canvas.draw()
 
     print ("update")
-    main.after(3000, update, f)
+    main.after(3000, update, tanks)
 
 class mainP(tk.Tk):
 
@@ -76,54 +77,61 @@ class GraphPage(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+
         label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
-        label.pack(pady=10,padx=10)
-        self.tanks=[]
+        label.grid(row=0, column=1)
+        #self.tanks=[]
         self.num=0
 
         button1 = ttk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
-        button1.pack()
+        button1.grid(row=1, column = 0)
 
         button2 = ttk.Button(self, text="New Tank",
-                            command=lambda: self.add_tank())
-        button2.pack()
+                            command=lambda: tanks.append(self.add_tank()))
+        button2.grid(row=1, column=2)
 
         #Add initial tank
-        self.tanks.append(self.add_tank())
-        
+        tanks.append(self.add_tank())
 
-        canvas = FigureCanvasTkAgg(f, self)
-        canvas.show()
-        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        # canvas = FigureCanvasTkAgg(tanks[0].f, self)
+        # canvas.show()
+        # canvas.get_tk_widget().grid(row=2, column=0)
 
-        toolbar = NavigationToolbar2TkAgg(canvas, self)
-        toolbar.update()
-        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        # canvas._tkcanvas.grid(row=2, column=1)
 
     def add_tank(self):
         self.num+=1
         #TODO: correct filename
-        fileName = "data"+str(len(self.tanks))
+        fileName = "data"+str(len(tanks))
+        print (fileName)
 
         container = tk.Frame(self)
-        return TankFrame(container, self, fileName)
+
+        frame = TankFrame(container, self, fileName)
+
+        canvas = FigureCanvasTkAgg(frame.f, self)
+        canvas.show()
+        canvas.get_tk_widget().grid(row=self.num+2, column=0)
+
+        canvas._tkcanvas.grid(row=self.num+2, column=1)
+        return frame
 
 class TankFrame(tk.Frame):
 
     def __init__(self, parent, controller, fileName):
         tk.Frame.__init__(self, parent)
-        #label = tk.Label(self, text="Graph Page!", font=LARGE_FONT)
-        #label.pack(pady=10,padx=10)
+        self.f = Figure(figsize=(5,5), dpi=100)
 
-        tank = tk.Frame(self)
-        fig = Figure(figsize=(5,5), dpi=100)
-        a = fig.add_subplot(111)
+        #tank = tk.Frame(self)
+        a = self.f.add_subplot(111)
         a.plot(data['x'], data['y'], color='r', label='Water Level')
         
         # a2 = f.add_subplot(111)
         a.plot(data2['date'], data2['level'], color='r', label='Info')
 
+        #frame.grid(row=0, column=0, sticky="nsew")
+
 main = mainP()
-main.after(3000, update, f)
+#main.after(3000, update, tanks)
 main.mainloop()
