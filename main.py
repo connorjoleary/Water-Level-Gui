@@ -27,7 +27,7 @@ def update(f):
     f.canvas.draw()
 
     print ("update")
-    main.after(3000, update, f)
+    main.after(5000, update, f)
 
 class mainP(tk.Tk):
 
@@ -83,13 +83,6 @@ class GraphPage(tk.Frame):
         button1 = ttk.Button(self, text="Back to Home",
                             command=lambda: controller.show_frame(StartPage))
         button1.pack()
-
-        button2 = ttk.Button(self, text="New Tank",
-                            command=lambda: add_tank())
-        button2.pack()
-
-        #Add one tank
-        Tanks.append(add_tank)
         
 
         canvas = FigureCanvasTkAgg(f, self)
@@ -100,17 +93,6 @@ class GraphPage(tk.Frame):
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-    def add_tank():
-        tank = Frame(GraphPage, self)
-        a = f.add_subplot(111)
-        a.plot(data['x'], data['y'], color='r', label='Tank 1')
-        
-        # a2 = f.add_subplot(111)
-        a.plot(data2['date'], data2['level'], color='r', label='Tank 2')
-
-        return tank
-
-
 main = mainP()
-main.after(3000, update, f)
+main.after(30, update, f)
 main.mainloop()
