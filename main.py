@@ -7,13 +7,20 @@ import tkinter as tk
 #from tkinter import ttk
 
 from buttons import *
-
+import os
 import numpy as np
 # data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
 # data2 = np.genfromtxt('
 # data1.csv', delimiter=',', names=['date', 'level'])
 figs = [Figure(figsize=(8,3), dpi=100), Figure(figsize=(8,3), dpi=100)]
-values=["Tank 1",.26, .025, "Tank 2", .26, .025]
+if not os.path.exists('./values.txt'):
+    file = open('values.txt', 'w')
+    i=0
+    for f in figs:
+        i+=1
+        file.write("Tank "+str(i)+"\n")
+        file.write(str(.26)+"\n")
+        file.write(str(.025)+"\n")
 
 def update(f):
     for f in figs:
@@ -131,19 +138,26 @@ class GraphPage(tk.Frame):
         label = tk.Label(self, text="Graph Page", font=("Helvetica", 32))
         label.grid(columnspan=2,pady=10,padx=10)
         i=0
+        file = open('values.txt', 'r')
+        data = file.readlines()
         for f in figs:
+            tk.Button(self, text=data[i*3].replace('\n',''), height = 1, width = 10, borderwidth=1, font=("Helvetica", 20),
+                            command=lambda i=i: tank_rename(i)).grid(row=i*3+1,column=0,padx=10)
+            
+            tk.Label(self, text="Battery Level: "+str(45)+"%", font=("Helvetica", 16)).grid(row=i*3+2,column=0,padx=10)
 
-            label = tk.Label(self, text=values[0+i*3]+"\n Battery: "+str(values[1+i*3]), font=("Helvetica", 20))
-            label.grid(row=i+1,column=0,padx=10)
+            tk.Button(self, text="Conversion Factors\nWater:"+data[i*3+1].replace('\n','')+" Battery:"+data[i*3+2].replace('\n',''), 
+                            height = 2, width = 18, borderwidth=1, font=("Helvetica", 12),
+                            command=lambda i=i: conv_factors(i)).grid(row=i*3+3,column=0,padx=10)
 
             canvas = FigureCanvasTkAgg(f, self)
             canvas.show()
             #canvas.get_tk_widget().grid(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-            canvas._tkcanvas.grid(row=i+1,column=1)
+            canvas._tkcanvas.grid(row=i*3+1,column=1, rowspan=3)
 
             i+=1
 
-        button1 = tk.Button(self, text="Back to Home", height = 2, width = 14, 
+        button1 = tk.Button(self, text="Back to Home", height = 2, width = 14,
                             command=lambda: controller.show_frame(StartPage))
         button1.grid(columnspan=2)
 
