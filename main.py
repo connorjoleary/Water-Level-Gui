@@ -13,14 +13,12 @@ import numpy as np
 # data2 = np.genfromtxt('
 # data1.csv', delimiter=',', names=['date', 'level'])
 figs = [Figure(figsize=(8,3), dpi=100), Figure(figsize=(8,3), dpi=100)]
-file = open('values.txt', 'r') 
+file = open('values.txt', 'r')
 data = file.readlines()
 file.close()
 if len(data) <= 0:
-    print ("got here")
     i=0
     for f in figs:
-        print ("got here")
         i+=1
         data.append("Tank "+str(i)+"\n")
         data.append(str(.26)+"\n")
@@ -31,21 +29,30 @@ if len(data) <= 0:
     file.close()
 
 def update(f):
+    i=0
     for f in figs:
         f.clear()
         a = f.add_subplot(1,2,1)
-        data = np.genfromtxt('data1.csv', delimiter=',', names=['time', 'level'])
-        dayData = data[-5:]
+        weekData = np.genfromtxt('tank3.csv', delimiter=',', dtype="S19, i4, i4")#, names=['time', 'battery', 'level', 'pointer'])
+        j=0
+        for date in weekData[0]:
+            weekData[0][j]= weekData[0][j][11:]
+        dayData = weekData[-5:] #TODO: fix with pointer
 
-        a.plot(dayData['time'], dayData['level'], color='g', label='One Day')
+        a.plot(dayData[0], dayData[2], color='g', label='One Day')
         a.set_title('One Day')
         a.set_ylim(ymin=0)
 
         a2 = f.add_subplot(1,2,2)
-        a2.plot(data['time'], data['level'], color='g', label='One Week')
+        a2.plot(weekData[0], weekData[2], color='g', label='One Week')
         a2.set_title('One Week')
         a2.set_ylim(ymin=0)
         f.canvas.draw()
+
+
+        main.frames[GraphPage].values[len(data)+i].set("Battery Level: "+str(45)+"%")
+
+        i+=1
 
 
     print ("update")
@@ -78,16 +85,16 @@ class mainP(tk.Tk):
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self, text="Start Page", font=("Helvetica", 32))
+        label = tk.Label(self, text="Water Level\nMonitoring System", font=("Helvetica", 64))
         label.pack(pady=10,padx=10)
 
-        button = tk.Button(self, text="Graphs",
+        button = tk.Button(self, text="Graphs", font=("Helvetica", 32),
                             command=lambda: controller.show_frame(GraphPage))
         button.pack()
-        button2 = tk.Button(self, text="Settings",
+        button2 = tk.Button(self, text="Settings", font=("Helvetica", 32),
                             command=lambda: controller.show_frame(SettingsPage))
         button2.pack()
-        button3 = tk.Button(self, text="Information",
+        button3 = tk.Button(self, text="Information", font=("Helvetica", 32),
                             command=lambda: controller.show_frame(InfoPage))
         button3.pack()
 
@@ -150,7 +157,6 @@ class GraphPage(tk.Frame):
         i=0
         # file = open('values.txt', 'r')
         # self.data = file.readlines()
-        print (data[0])
         self.values = []
         for dat in data:
             val =  tk.StringVar()
@@ -162,8 +168,9 @@ class GraphPage(tk.Frame):
             tk.Button(self, text=self.values[i*3].get(), textvariable=self.values[i*3], height = 1, width = 10, borderwidth=1, font=("Helvetica", 20),
                             command=lambda i=i: self.tank_rename(i)).grid(row=i*5+1,column=0,columnspan=2, padx=10)
             
-            lab = tk.Label(self, text="Battery Level: "+str(45)+"%", font=("Helvetica", 16))
-            self.values.append(lab)
+            val =  tk.StringVar()
+            lab = tk.Label(self, textvariable= val,font=("Helvetica", 16))
+            self.values.append(val)
             lab.grid(row=i*5+2,column=0,columnspan=2,padx=10)
 
             tk.Label(self, text="Conversion Factors", font=("Helvetica", 12)).grid(row=i*5+3,column=0,columnspan=2,padx=10)
