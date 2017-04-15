@@ -5,6 +5,7 @@ from matplotlib.figure import Figure
 
 import tkinter as tk
 #from tkinter import ttk
+from PIL import ImageGrab
 
 #from buttons import *
 import os
@@ -33,10 +34,10 @@ def update(f):
     for f in figs:
         f.clear()
         a = f.add_subplot(1,2,1)
-        weekData = np.genfromtxt('tank3.csv', delimiter=',', dtype="S19, i4, i4")#, names=['time', 'battery', 'level', 'pointer'])
+        weekData = np.genfromtxt('test.csv', delimiter=',')#dtype="i4, i4, i4", , names=['time', 'battery', 'level', 'pointer']) TODO
         j=0
-        for date in weekData[0]:
-            weekData[0][j]= weekData[0][j][11:]
+        #for date in weekData[0]:
+        #    weekData[0][j]= weekData[0][j][11:]
         dayData = weekData[-5:] #TODO: fix with pointer
 
         a.plot(dayData[0], dayData[2], color='g', label='One Day')
@@ -54,9 +55,15 @@ def update(f):
 
         i+=1
 
+    x=main.winfo_rootx()
+    y=main.winfo_rooty()
+    x1=x+main.winfo_width()
+    y1=y+main.winfo_height()
+    ImageGrab.grab().crop((x,y,x1,y1)).save("./image.png")
 
     print ("update")
     main.after(5000, update, figs)
+    
 
 class mainP(tk.Tk):
 
@@ -148,10 +155,24 @@ class SettingsPage(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         button1.grid(columnspan=3)
 
+def myfunction(event):
+    canvas.configure(scrollregion=canvas.bbox("all"),width=200,height=200)
+
 class GraphPage(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        
+        canvas=tk.Canvas(self)
+        frame=tk.Frame(canvas)
+        myscrollbar=tk.Scrollbar(self,orient="vertical",command=canvas.yview)
+        canvas.configure(yscrollcommand=myscrollbar.set)
+
+        #myscrollbar.grid(column=6, row=0, rowspan=1, sticky='ns')
+        canvas.grid()
+        canvas.create_window((0,0),window=frame,anchor='nw')
+        frame.bind("<Configure>",myfunction)
+        
         label = tk.Label(self, text="Graph Page", font=("Helvetica", 32))
         label.grid(columnspan=2,pady=10,padx=10)
         i=0
