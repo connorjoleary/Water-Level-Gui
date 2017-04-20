@@ -2,14 +2,16 @@ import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
+import matplotlib.dates as mdates
 
 import tkinter as tk
 #from tkinter import ttk
 from PIL import ImageGrab
 
 #from buttons import *
-import os
+import os, glob
 import numpy as np
+from datetime import datetime
 # data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
 # data2 = np.genfromtxt('
 # data1.csv', delimiter=',', names=['date', 'level'])
@@ -24,7 +26,8 @@ if len(data) <= 0:
         data.append("Tank "+str(i)+"\n")
         data.append(str(.26)+"\n")
         data.append(str(.025)+"\n")
-
+    data.append(str(6)+"\n")
+    data.append(str(6)+"\n")
     file = open('values.txt', 'w')
     file.writelines(data)
     file.close()
@@ -33,23 +36,48 @@ def update(f):
     i=0
     for f in figs:
         f.clear()
-        a = f.add_subplot(1,2,1)
-        weekData = np.genfromtxt('test.csv', delimiter=',')#dtype="i4, i4, i4", , names=['time', 'battery', 'level', 'pointer']) TODO
-        j=0
+        a = f.add_subplot(1, 2, 1)
+        str2date = lambda x: datetime.strptime(x.decode("utf-8"), '%Y-%m-%d %H:%M:%S')
+        fileName = "tank"+str(i+1)+".csv"
+        weekData = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4",names=True, delimiter=',', converters = {0: str2date})
+        # weekData = np.genfromtxt('test.csv', delimiter=',')#dtype="i4, i4, i4", , names=['time', 'battery', 'level', 'pointer']) TODO
+        j = 0
         #for date in weekData[0]:
         #    weekData[0][j]= weekData[0][j][11:]
+        # weekData[0]=matplotlib.dates.datestr2num(weekData[0])
         dayData = weekData[-5:] #TODO: fix with pointer
 
-        a.plot(dayData[0], dayData[2], color='g', label='One Day')
+        test = [np.datetime64(row[0]).astype(datetime) for row in dayData]
+        a.plot_date(test, [row[2] for row in dayData], color='g', label='One Day', ls='solid')
+        
+        # a.locator_params(nbins=4)
+        # a.locator_params(nticks=4)
+        a.tick_params(axis='x', which='major', labelsize=7)
+        ticks = a.get_xticks()
+        n = len(ticks)//4
+        a.set_xticks(ticks[::n])
+
         a.set_title('One Day')
         a.set_ylim(ymin=0)
 
+        #dates=matplotlib.dates.date2num(weekData[0])
         a2 = f.add_subplot(1,2,2)
-        a2.plot(weekData[0], weekData[2], color='g', label='One Week')
+        test = [np.datetime64(row[0]).astype(datetime) for row in weekData]
+        a2.plot_date(test, [row[2] for row in weekData], color='g', label='One Week', ls='solid')
+        a2.tick_params(axis='x', which='major', labelsize=7)
+        # loc = a2.xaxis.get_major_locator()
+        # loc.maxticks[DAILY]=1
+        
+        ticks2 = a2.get_xticks()
+        n2 = len(ticks2)//4
+        a2.set_xticks(ticks2[::n2])
+        a2.set_xticklabels(a2.xaxis.get_majorticklabels(), rotation=15)
+        xfmt = mdates.DateFormatter('%d %H:%M')
+        a2.xaxis.set_major_formatter(xfmt)
         a2.set_title('One Week')
         a2.set_ylim(ymin=0)
-        f.canvas.draw()
 
+        f.canvas.draw()
 
         main.frames[GraphPage].values[len(data)+i].set("Battery Level: "+str(45)+"%")
 
@@ -125,35 +153,40 @@ class SettingsPage(tk.Frame):
         label = tk.Label(self, text="Settings", font=("Helvetica", 32))
         label.grid(row=0, column=0, columnspan=3)
 
-        tk.Label(self, text="Tank Names", font=("Helvetica", 20)).grid(padx=10,row=2,)
-        tk.Label(self, text="First",font=("Helvetica", 16)).grid(padx=10,row=2, column=1)
-        tk.Label(self, text="Second",font=("Helvetica", 16)).grid(padx=10,row=3, column=1)
+        tk.Label(self, text="Serial Port Number", font=("Helvetica", 20)).grid(padx=10,row=1)
+        self.e1 = tk.Entry(self)
+        self.e1.grid(padx=10,row=1, column=2)
 
-        e1 = tk.Entry(self)
-        e2 = tk.Entry(self)
-        e1.grid(padx=10,row=2, column=2)
-        e2.grid(padx=10,row=3, column=2)
-
-        tk.Label(self, text="Conversion Factors", font=("Helvetica", 20)).grid(padx=10,row=4)
-        tk.Label(self, text="Water Level \n(to get inches)",font=("Helvetica", 16)).grid(padx=10,row=4, column=1)
-        tk.Label(self, text="Battery \n(to get volts)",font=("Helvetica", 16)).grid(padx=10,row=5, column=1)
-
-        e3 = tk.Entry(self)
-        e4 = tk.Entry(self)
-        e3.grid(padx=10,row=4, column=2)
-        e4.grid(padx=10,row=5, column=2)
-
-        tk.Label(self, text="Serial Port Number", font=("Helvetica", 20)).grid(padx=10,row=6)
-        e5 = tk.Entry(self)
-        e5.grid(padx=10,row=6, column=2)
+        tk.Label(self, text="Baudrate", font=("Helvetica", 20)).grid(padx=10,row=2)
+        self.e2 = tk.Entry(self)
+        self.e2.grid(padx=10,row=2, column=2)
 
         button = tk.Button(self, text="Enter",
-                            command=lambda: getValues())
+                            command=lambda: self.getValues())
         button.grid(column=2)
 
-        button1 = tk.Button(self, text="Back to Home",  height = 2, width = 14,
-                            command=lambda: controller.show_frame(StartPage))
-        button1.grid(columnspan=3)
+        tk.Button(self, text="Clear All Tank Data",  height = 2, width = 14,
+                            command=lambda: clear_tanks()).grid(columnspan=3) 
+
+        tk.Button(self, text="Back to Home",  height = 2, width = 14,
+                            command=lambda: controller.show_frame(StartPage)).grid(columnspan=3) 
+
+    def getValues(self):
+        if (self.e1.get()!=""):
+            data[3*len(figs)]=self.e1.get()+"\n"
+            self.e1.delete(0,tk.END)
+            with open('values.txt', 'w') as file:
+                file.writelines(data)
+        if (self.e2.get()!=""):
+            data[3*len(figs)+1]=self.e2.get()+"\n"
+            self.e2.delete(0,tk.END)
+            with open('values.txt', 'w') as file:
+                file.writelines(data)
+        
+def clear_tanks():
+    for f in glob.glob("*.csv"):
+        os.remove(f)
+    os.remove("counter.txt")
 
 def myfunction(event):
     canvas.configure(scrollregion=canvas.bbox("all"),width=200,height=200)
@@ -163,15 +196,15 @@ class GraphPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         
-        canvas=tk.Canvas(self)
-        frame=tk.Frame(canvas)
-        myscrollbar=tk.Scrollbar(self,orient="vertical",command=canvas.yview)
-        canvas.configure(yscrollcommand=myscrollbar.set)
+        # canvas=tk.Canvas(self) TODO
+        # frame=tk.Frame(canvas)
+        # myscrollbar=tk.Scrollbar(self,orient="vertical",command=canvas.yview)
+        # canvas.configure(yscrollcommand=myscrollbar.set)
 
         #myscrollbar.grid(column=6, row=0, rowspan=1, sticky='ns')
-        canvas.grid()
-        canvas.create_window((0,0),window=frame,anchor='nw')
-        frame.bind("<Configure>",myfunction)
+        # canvas.grid()
+        # canvas.create_window((0,0),window=frame,anchor='nw')
+        # frame.bind("<Configure>",myfunction)
         
         label = tk.Label(self, text="Graph Page", font=("Helvetica", 32))
         label.grid(columnspan=2,pady=10,padx=10)
