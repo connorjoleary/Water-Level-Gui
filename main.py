@@ -5,16 +5,13 @@ from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 
 import tkinter as tk
-#from tkinter import ttk
 from PIL import ImageGrab
 
-#from buttons import *
 import os, glob
 import numpy as np
 from datetime import datetime
-# data = np.genfromtxt('test.csv', delimiter=',', names=['x', 'y'])
-# data2 = np.genfromtxt('
-# data1.csv', delimiter=',', names=['date', 'level'])
+
+# Sets the number of tanks to be 2
 figs = [Figure(figsize=(8,3), dpi=100), Figure(figsize=(8,3), dpi=100)]
 file = open('values.txt', 'r')
 data = file.readlines()
@@ -40,56 +37,48 @@ def update(f):
         str2date = lambda x: datetime.strptime(x.decode("utf-8"), '%Y-%m-%d %H:%M:%S')
         fileName = "tank"+str(i+1)+".csv"
         weekData = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4",names=True, delimiter=',', converters = {0: str2date})
-        # weekData = np.genfromtxt('test.csv', delimiter=',')#dtype="i4, i4, i4", , names=['time', 'battery', 'level', 'pointer']) TODO
-        j = 0
-        #for date in weekData[0]:
-        #    weekData[0][j]= weekData[0][j][11:]
-        # weekData[0]=matplotlib.dates.datestr2num(weekData[0])
-        dayData = weekData[-5:] #TODO: fix with pointer
-
-        test = [np.datetime64(row[0]).astype(datetime) for row in dayData]
-        a.plot_date(test, [row[2] for row in dayData], color='g', label='One Day', ls='solid')
         
-        # a.locator_params(nbins=4)
-        # a.locator_params(nticks=4)
+        j = 0
+        dayData = weekData[-5:] #TODO: fix with pointer
+        xfmt = mdates.DateFormatter('%d %H:%M')
+        conv = float(data[i*3+1])
+
+        temp = [np.datetime64(row[0]).astype(datetime) for row in dayData]
+        a.plot_date(temp, [row[2]*conv for row in dayData], color='g', label='One Day', ls='solid')
         a.tick_params(axis='x', which='major', labelsize=7)
         ticks = a.get_xticks()
         n = len(ticks)//4
         a.set_xticks(ticks[::n])
-
+        a.set_xticklabels(a.xaxis.get_majorticklabels(), rotation=15)
+        a.xaxis.set_major_formatter(xfmt)
         a.set_title('One Day')
         a.set_ylim(ymin=0)
 
-        #dates=matplotlib.dates.date2num(weekData[0])
         a2 = f.add_subplot(1,2,2)
-        test = [np.datetime64(row[0]).astype(datetime) for row in weekData]
-        a2.plot_date(test, [row[2] for row in weekData], color='g', label='One Week', ls='solid')
+        temp2 = [np.datetime64(row[0]*conv).astype(datetime) for row in weekData]
+        a2.plot_date(temp2, [row[2] for row in weekData], color='g', label='One Week', ls='solid')
         a2.tick_params(axis='x', which='major', labelsize=7)
-        # loc = a2.xaxis.get_major_locator()
-        # loc.maxticks[DAILY]=1
-        
         ticks2 = a2.get_xticks()
         n2 = len(ticks2)//4
         a2.set_xticks(ticks2[::n2])
         a2.set_xticklabels(a2.xaxis.get_majorticklabels(), rotation=15)
-        xfmt = mdates.DateFormatter('%d %H:%M')
         a2.xaxis.set_major_formatter(xfmt)
         a2.set_title('One Week')
         a2.set_ylim(ymin=0)
 
         f.canvas.draw()
 
-        main.frames[GraphPage].values[len(data)+i].set("Battery Level: "+str(45)+"%")
+        main.frames[GraphPage].values[len(data)+i].set("Battery Level: "+str(45)+"%") #TODO
 
         i+=1
 
+    # Creates the Image
     x=main.winfo_rootx()
     y=main.winfo_rooty()
     x1=x+main.winfo_width()
     y1=y+main.winfo_height()
     ImageGrab.grab().crop((x,y,x1,y1)).save("./image.png")
 
-    print ("update")
     main.after(5000, update, figs)
     
 
@@ -196,12 +185,13 @@ class GraphPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         
-        # canvas=tk.Canvas(self) TODO
+        # TODO: Possible Scroll Bar for more than two tanks
+        # canvas=tk.Canvas(self)
         # frame=tk.Frame(canvas)
         # myscrollbar=tk.Scrollbar(self,orient="vertical",command=canvas.yview)
         # canvas.configure(yscrollcommand=myscrollbar.set)
 
-        #myscrollbar.grid(column=6, row=0, rowspan=1, sticky='ns')
+        # myscrollbar.grid(column=6, row=0, rowspan=len(figs)*5+2, sticky='ns')
         # canvas.grid()
         # canvas.create_window((0,0),window=frame,anchor='nw')
         # frame.bind("<Configure>",myfunction)
@@ -209,14 +199,12 @@ class GraphPage(tk.Frame):
         label = tk.Label(self, text="Graph Page", font=("Helvetica", 32))
         label.grid(columnspan=2,pady=10,padx=10)
         i=0
-        # file = open('values.txt', 'r')
-        # self.data = file.readlines()
+
         self.values = []
         for dat in data:
             val =  tk.StringVar()
             val.set(dat.replace('\n',''))
             self.values.append(val)
-        print ("Tank 1: "+self.values[0].get())
         for f in figs:
             content = tk.StringVar()
             tk.Button(self, text=self.values[i*3].get(), textvariable=self.values[i*3], height = 1, width = 10, borderwidth=1, font=("Helvetica", 20),
@@ -240,7 +228,6 @@ class GraphPage(tk.Frame):
 
             canvas = FigureCanvasTkAgg(f, self)
             canvas.show()
-            #canvas.get_tk_widget().grid(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
             canvas._tkcanvas.grid(row=i*5+1,column=2, rowspan=5)
 
             i+=1
@@ -277,14 +264,6 @@ class GraphPage(tk.Frame):
         data[3*num+context]=string+"\n"
         self.values[3*num+context].set(string)
 
-        # with open('values.txt', 'r') as file:
-        #     # read a list of lines into data
-        #     data = file.readlines()
-
-        # change the line 
-
-        # and write everything back
-        # print ("changing: " +string)
         with open('values.txt', 'w') as file:
             file.writelines(data)
         
