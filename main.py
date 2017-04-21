@@ -37,16 +37,11 @@ def update(f):
         str2date = lambda x: datetime.strptime(x.decode("utf-8"), '%Y-%m-%d %H:%M:%S')
         fileName = "tank"+str(i+1)+".csv"
         weekData = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4",names=True, delimiter=',', converters = {0: str2date})
+
+        temp2 = [np.datetime64(row[0]).astype(datetime) for row in weekData]
+        recent=temp2.index(max(temp2))+1
+        dayData = weekData[recent-5:recent] #TODO: fix with pointer
         
-        j = 0
-        recent = datetime.min
-        for row in weekData:
-            if(row[0]>recent):
-                recent=row[0]
-                recentP=j
-            j+=1
-        print ("This is wrong:",recentP)
-        dayData = weekData[recentP-5:recentP] #TODO: fix with pointer
         xfmt = mdates.DateFormatter('%d %H:%M')
         conv = float(data[i*3+1])
 
