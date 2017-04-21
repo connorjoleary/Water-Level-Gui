@@ -39,7 +39,14 @@ def update(f):
         weekData = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4",names=True, delimiter=',', converters = {0: str2date})
         
         j = 0
-        dayData = weekData[-5:] #TODO: fix with pointer
+        recent = datetime.min
+        for row in weekData:
+            if(row[0]>recent):
+                recent=row[0]
+                recentP=j
+            j+=1
+        print ("This is wrong:",recentP)
+        dayData = weekData[recentP-5:recentP] #TODO: fix with pointer
         xfmt = mdates.DateFormatter('%d %H:%M')
         conv = float(data[i*3+1])
 
@@ -55,8 +62,8 @@ def update(f):
         a.set_ylim(ymin=0)
 
         a2 = f.add_subplot(1,2,2)
-        temp2 = [np.datetime64(row[0]*conv).astype(datetime) for row in weekData]
-        a2.plot_date(temp2, [row[2] for row in weekData], color='g', label='One Week', ls='solid')
+        temp2 = [np.datetime64(row[0]).astype(datetime) for row in weekData]
+        a2.plot_date(temp2, [row[2]*conv for row in weekData], color='g', label='One Week', ls='solid')
         a2.tick_params(axis='x', which='major', labelsize=7)
         ticks2 = a2.get_xticks()
         n2 = len(ticks2)//4
@@ -146,7 +153,7 @@ class SettingsPage(tk.Frame):
         self.e1 = tk.Entry(self)
         self.e1.grid(padx=10,row=1, column=2)
 
-        tk.Label(self, text="Baudrate", font=("Helvetica", 20)).grid(padx=10,row=2)
+        tk.Label(self, text="Baud Rate", font=("Helvetica", 20)).grid(padx=10,row=2)
         self.e2 = tk.Entry(self)
         self.e2.grid(padx=10,row=2, column=2)
 
