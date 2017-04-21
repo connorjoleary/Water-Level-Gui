@@ -40,8 +40,10 @@ def update(f):
 
         temp2 = [np.datetime64(row[0]).astype(datetime) for row in weekData]
         recent=temp2.index(max(temp2))+1
-        dayData = weekData[recent-5:recent] #TODO: fix with pointer
-        
+        try:
+            dayData = weekData[recent-5:recent]
+        except IndexError:
+            dayData = weekData[0:recent].append(weekData[-1*(5-recent):])
         xfmt = mdates.DateFormatter('%d %H:%M')
         conv = float(data[i*3+1])
 
