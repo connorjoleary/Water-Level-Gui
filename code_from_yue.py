@@ -52,7 +52,7 @@ def write_to_to_file(tank_number, battery_level,water_level):
             writer.writeheader()
             writer = csv.writer(csvfile,lineterminator='\n')  
             for num in range(0,336):
-                writer.writerow(['1/1/1111  0:00:00 AM','0','0','0'])
+                writer.writerow(['2017-01-01  00:00:00'])
             csvfile.close
         
     try: 
@@ -115,7 +115,7 @@ while True:
             d = c.split(",")
             d[1] = str(randint(400,600))
             d[2] = str(randint(200,400))
-            d[3] = str(randint(0,1000))
+            d[3] = str(randint(0,200))
             if len(c.split(",")) == 7:
                 print("battery " + d[1])
                 print("water" + d[2])

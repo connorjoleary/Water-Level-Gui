@@ -36,14 +36,17 @@ def update(f):
         a = f.add_subplot(1, 2, 1)
         str2date = lambda x: datetime.strptime(x.decode("utf-8"), '%Y-%m-%d %H:%M:%S')
         fileName = "tank"+str(i+1)+".csv"
-        weekData = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4",names=True, delimiter=',', converters = {0: str2date})
+        weekData = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4, i4",names=True, delimiter=',', converters = {0: str2date})
 
         temp2 = [np.datetime64(row[0]).astype(datetime) for row in weekData]
         recent=temp2.index(max(temp2))+1
-        try:
-            dayData = weekData[recent-5:recent]
-        except IndexError:
-            dayData = weekData[0:recent].append(weekData[-1*(5-recent):])
+        if (len(weekData)>48):
+            try:
+                dayData = weekData[recent-5:recent]
+            except IndexError:
+                dayData = weekData[0:recent].append(weekData[-1*(5-recent):])
+        else:
+            dayData=weekData
         xfmt = mdates.DateFormatter('%d %H:%M')
         conv = float(data[i*3+1])
 
@@ -71,8 +74,9 @@ def update(f):
         a2.set_ylim(ymin=0)
 
         f.canvas.draw()
+        print(weekData[recent-1][1]*data[i*3+2])
 
-        main.frames[GraphPage].values[len(data)+i].set("Battery Level: "+str(45)+"%") #TODO
+        main.frames[GraphPage].values[len(data)+i].set("Battery Level: "+str(weekData[recent-1][1]*float(data[i*3+2]))+"%") #TODO
 
         i+=1
 
@@ -83,7 +87,7 @@ def update(f):
     y1=y+main.winfo_height()
     ImageGrab.grab().crop((x,y,x1,y1)).save("./image.png")
 
-    main.after(5000, update, figs)
+    main.after(10000, update, figs)
     
 
 class mainP(tk.Tk):
@@ -179,7 +183,8 @@ class SettingsPage(tk.Frame):
 def clear_tanks():
     for f in glob.glob("*.csv"):
         os.remove(f)
-    os.remove("counter.txt")
+    for f in glob.glob("counter.txt"): #if there is one, remove it
+        os.remove("counter.txt")
 
 def myfunction(event):
     canvas.configure(scrollregion=canvas.bbox("all"),width=200,height=200)
