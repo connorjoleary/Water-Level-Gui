@@ -188,8 +188,27 @@ class InfoPage(tk.Frame):
         label = tk.Label(self, text="Information", font=("Helvetica", 32))
         label.pack()
 
+        tk.Label(self, text="Description", font=("Helvetica", 24)).pack()
+        tk.Label(self, text="This is a program designed to keep track of the water level and \n \
+battery level from a serial port input. It then displays this \n \
+information on a GUI and a website.\n",font=("Helvetica", 12)).pack()
+                            
+        tk.Label(self, text="How to Use", font=("Helvetica", 24)).pack()
+        tk.Label(self, text="Simply run this GUI then if the data gets corrupted, clear it from\n\
+the settings page and possibly restart the gui.\n",font=("Helvetica", 12)).pack()
+
+
+        tk.Label(self, text="How it works", font=("Helvetica", 24)).pack()
+        tk.Label(self, text="The program will read in bytes from serial port, and split it into\n\
+7 pieces, take the third fourth piece and multiply by a factor to get\n\
+the water level and battery level, the fifth piece will be the indicator\n\
+of tank number. Write all information above into CSV files named by \n\
+each tank. The GUI will read in those CSV files and display a chart of\n\
+water level against time, and output those file to a png file. Finally\n\
+run an Apache server and display the png file online.\n",font=("Helvetica", 12)).pack()
+
         tk.Label(self, text="Creators", font=("Helvetica", 24)).pack()
-        tk.Label(self, text="Connor O'Leary\nDavid Hamilton\nYue Gong",
+        tk.Label(self, text="Connor O'Leary\nDavid Hamilton\nYue Gong\n\n",
                  font=("Helvetica", 12)).pack()
 
         button1 = tk.Button(self, text="Back to Home",
