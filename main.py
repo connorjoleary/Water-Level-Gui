@@ -70,8 +70,11 @@ def update(f):
         if len(glob.glob("tank[0-9].csv"))<=0:
             day3Data = [['2016-01-01 00:00:00',0,0]]
         else:
-            day3Data = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4",names=True, delimiter=',', comments='#', converters = {0: str2date})
-            day3Data = sorted(day3Data, key=lambda row: np.datetime64(row[0]).astype(datetime))
+            try:
+                day3Data = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4",names=True, delimiter=',', comments='#', converters = {0: str2date})
+                day3Data = sorted(day3Data, key=lambda row: np.datetime64(row[0]).astype(datetime))
+            except (TypeError, OSError):
+                day3Data = [['2016-01-01 00:00:00',0,0]]
 
         temp2 = [np.datetime64(row[0]).astype(datetime) for row in day3Data]
         recent=temp2.index(max(temp2))+1
@@ -89,7 +92,7 @@ def update(f):
         a.plot_date(temp, [row[2]*conv for row in halfDayData], color='g', label='Half Day', ls='solid')
         a.tick_params(axis='x', which='major', labelsize=7)
         ticks = a.get_xticks()
-        n = len(ticks)//4
+        n = len(ticks)//5+1
         a.set_xticks(ticks[::n])
         a.set_xticklabels(a.xaxis.get_majorticklabels(), rotation=15)
         a.xaxis.set_major_formatter(xfmt)
@@ -101,7 +104,7 @@ def update(f):
         a2.plot_date(temp2, [row[2]*conv for row in day3Data], color='g', label='Three Days', ls='solid')
         a2.tick_params(axis='x', which='major', labelsize=7)
         ticks2 = a2.get_xticks()
-        n2 = len(ticks2)//4
+        n2 = len(ticks2)//5+1
         a2.set_xticks(ticks2[::n2])
         a2.set_xticklabels(a2.xaxis.get_majorticklabels(), rotation=15)
         a2.xaxis.set_major_formatter(xfmt)
@@ -110,8 +113,8 @@ def update(f):
 
         f.canvas.draw()
 
-        main.frames[GraphPage].values[len(data)+i*2].set("Current Water Level: "+str(day3Data[recent-1][2]*float(data[i*3+1]))+"%")
-        main.frames[GraphPage].values[len(data)+i*2+1].set("Current Battery Level: "+str(day3Data[recent-1][1]*float(data[i*3+2]))+"%")
+        main.frames[GraphPage].values[len(data)+i*2].set("Current Water Level: "+format(day3Data[recent-1][2]*float(data[i*3+1]),'.2f')+"%")
+        main.frames[GraphPage].values[len(data)+i*2+1].set("Current Battery Level: "+format(day3Data[recent-1][1]*float(data[i*3+2]), '.2f')+"%")
 
         i+=1
 
@@ -122,7 +125,7 @@ def update(f):
     y1=y+main.winfo_height()
     ImageGrab.grab().crop((x,y,x1,y1)).save("./image.png")
 
-    main.after(10000, update, figs)
+    main.after(1000, update, figs)
     
 
 class mainP(tk.Tk):

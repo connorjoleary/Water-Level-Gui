@@ -111,7 +111,7 @@ def code():
                 d = c.split(",")
                 d[1] = str(randint(400,600))
                 d[2] = str(randint(200,400))
-                d[3] = str(randint(0,200))
+                d[3] = str(randint(0,199))
                 if len(c.split(",")) == 7:
                     print("battery " + d[1])
                     print("water" + d[2])
