@@ -37,7 +37,7 @@ def code():
         tank_number = str(tank_number)
         file_name = "tank" + tank_number + ".csv"
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print(current_time)
+        #print(current_time)
         counter_number = int(tank_number)-1
         counter[counter_number] = counter[counter_number]+1
         with open('counter.txt','w') as f:
@@ -77,8 +77,7 @@ def code():
         except IOError as e:
             print('IR err')
             
-            
-        return;
+        return
 
     port = 'COM3'
     baud_rate = 9600
@@ -104,49 +103,45 @@ def code():
         #data_raw = ser.readline()  
         data_raw = b'\xc0\x00\x82\xa0\xa8\xa8h@`\xa8\x82\x9c\x96@@d\xae\x92\x88\x8a@@a\x03\xf0T#074,515,303,294,328,323,00000011\xc0'
         if data_raw != b'':
-            #print('not blank')
+            ##print('not blank')
             c = data_raw.decode("utf-8", "ignore")
             if '#' in c:
-                print(c.split(","))
+                #print(c.split(","))
                 d = c.split(",")
                 d[1] = str(randint(400,600))
                 d[2] = str(randint(200,400))
                 d[3] = str(randint(0,199))
                 if len(c.split(",")) == 7:
-                    print("battery " + d[1])
-                    print("water" + d[2])
+                    #print("battery " + d[1])
+                    #print("water" + d[2])
                     d[3] = int(d[3])
                     if d[3] < 100:
-                        print('100')
+                        #print('100')
                         write_to_to_file(1,d[1],d[2])
                     elif d[3] < 200 and d[3] >= 100:
-                        print('200')
+                        #print('200')
                         write_to_to_file(2,d[1],d[2])
                     elif d[3] < 300 and d[3] >= 200:
-                        print('300')
+                        #print('300')
                         write_to_to_file(3,d[1],d[2])
                     elif d[3] < 400 and d[3] >= 300:
-                        print('400')
+                        #print('400')
                         write_to_to_file(4,d[1],d[2])
                     elif d[3] < 500 and d[3] >= 400:
-                        print('500')
+                        #print('500')
                         write_to_to_file(5,d[1],d[2])
                     elif d[3] < 600 and d[3] >= 500:
-                        print('600')
+                        #print('600')
                         write_to_to_file(6,d[1],d[2])
                     elif d[3] < 700 and d[3] >= 600:
-                        print('700')
+                        #print('700')
                         write_to_to_file(7,d[1],d[2])
                     elif d[3] < 800 and d[3] >= 700:
-                        print('800')
+                        #print('800')
                         write_to_to_file(8,d[1],d[2])
                     elif d[3] < 900 and d[3] >= 800:
-                        print('900')
+                        #print('900')
                         write_to_to_file(9,d[1],d[2])
                     elif d[3] < 1000 and d[3] >= 900:
-                        print('1000')
+                        #print('1000')
                         write_to_to_file(10,d[1],d[2]) 
-            
-            
-            
-            

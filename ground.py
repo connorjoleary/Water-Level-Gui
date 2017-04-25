@@ -32,7 +32,7 @@ def update(f):
     a.plot(data['x'], data['y'], color='r', label='the data')
     f.canvas.draw()
 
-    print ("update")
+    ##print ("update")
     main.after(3000, update, f)
 
 main.after(3000, update, f)
