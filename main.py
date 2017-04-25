@@ -11,13 +11,19 @@ import os, glob, sys
 import numpy as np
 from datetime import datetime
 
+import time
+import code_from_yue as Yue
+
 # Run data creator
 def run_Yue():
     exec(open("./code_from_yue.py").read())
-thread = Thread(target = run_Yue, args=[])
+thread = Thread(target = Yue.code, args=[])
+thread.daemon=True
 thread.start()
+time.sleep(2)
 
 #os.system("python code_from_yue.py")
+
 
 # Gets the number of tanks
 figs=[]
@@ -43,8 +49,8 @@ if len(data) != len(figs)*3+2:
         data.append("Tank "+str(i)+"\n")
         data.append(str(.26)+"\n")
         data.append(str(.025)+"\n")
-    data.append(str(6)+"\n")
-    data.append(str(6)+"\n")
+    data.append("COM3\n")
+    data.append(str(9600)+"\n")
     file = open('values.txt', 'w')
     file.writelines(data)
     file.close()
@@ -59,11 +65,13 @@ def update(f):
         a = f.add_subplot(1, 2, 1)
         str2date = lambda x: datetime.strptime(x.decode("utf-8"), '%Y-%m-%d %H:%M:%S')
         fileName = "tank"+str(i+1)+".csv"
+
         # if the tanks have been cleared
         if len(glob.glob("tank[0-9].csv"))<=0:
             day3Data = [['2016-01-01 00:00:00',0,0]]
         else:
-            day3Data = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4",names=True, delimiter=',', converters = {0: str2date})
+            day3Data = np.genfromtxt(fileName,dtype="datetime64[us], i4, i4",names=True, delimiter=',', comments='#', converters = {0: str2date})
+            day3Data = sorted(day3Data, key=lambda row: np.datetime64(row[0]).astype(datetime))
 
         temp2 = [np.datetime64(row[0]).astype(datetime) for row in day3Data]
         recent=temp2.index(max(temp2))+1
